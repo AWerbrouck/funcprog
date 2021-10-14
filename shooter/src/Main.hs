@@ -66,8 +66,10 @@ bottom, top :: Y
 left, right :: X
 bottom = (-10)
 top    = 10
-left   = 0
-right  = width
+left   = round (-(div width 2))
+right  = round (div width 2)
+------------------------------------------------------------------------
+-- hulpFuncties
 
 ------------------------------------------------------------------------
 -- Grafische elementen
@@ -134,10 +136,7 @@ moveAndCollide move (moving, static) = undefined
 next :: Float -> Game -> Game
 next t (Playing p o b []) = next t (Playing p o b [[]])
 next t (Playing p o b l) 
-    | null [ (r,t) | (r,t) <- o, t == (-10)] = Playing p
-                                                       on
-                                                       ob
-                                                      (tail l)
+    | null [ (r,t) | (r,t) <- o, t == (-10)] = Playing p on ob (tail l)
     | otherwise                              = GameOver
   where (on,ob) = (collide ([ (x,(y-1)) | (x,y) <- (o ++ [((g-5),top)| g <- (head l)])]) ([ (x,(y+1)) | (x,y) <- b ]))
 
@@ -150,8 +149,8 @@ incBound x b = min b (x + 1)
 
 -- Verwerk gebruiksinput.
 move :: Event -> Game -> Game
-move (EventKey (SpecialKey KeyLeft)  Down _ _) (Playing (x,y) o b l) = Playing ((x-1),y) o b l
-move (EventKey (SpecialKey KeyRight) Down _ _) (Playing (x,y) o b l) = Playing ((x+1),y) o b l
+move (EventKey (SpecialKey KeyLeft)  Down _ _) (Playing (x,y) o b l) = Playing ((decBound x left),y) o b l
+move (EventKey (SpecialKey KeyRight) Down _ _) (Playing (x,y) o b l) = Playing ((incBound x right),y) o b l
 move (EventKey (SpecialKey KeySpace) Down _ _) (Playing (x,y) o b l) = Playing (x,y) o (b++[(x,y)]) l
 move _                                                             g = g 
 
@@ -168,7 +167,7 @@ startGame = Playing (0,-10) [(0,8)] [] level1
 -- Start het spel op.
 main  = play (InWindow "UGent Brick Game" (500, 800) (10, 10))
              screenGreen -- de achtergrondkleur
-             2 -- aantal stappen per seconde
+             1 -- aantal stappen per seconde
              startGame -- de beginwereld
              gamePic -- de 'render'-functie, om naar scherm te tekenen
              move -- de 'handle'-functie, om gebruiksinvoer te verwerken
